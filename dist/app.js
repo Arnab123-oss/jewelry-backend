@@ -15,5 +15,5 @@ app.get("/", (req, res) => {
 });
 app.use(errorMiddleware);
 app.listen(port, () => {
-    console.log(`express is working on http://localhost${port}`);
+    console.log(`express is working on http://localhost:${port}`);
 });
