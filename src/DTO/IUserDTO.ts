@@ -7,3 +7,11 @@ export interface UserRequestBody{
     role: string;
     dob:Date;
 }
+
+export interface ProductRequestBody{
+    name: string;
+    category: string;
+    price:number;
+    stock: number;
+}
+
