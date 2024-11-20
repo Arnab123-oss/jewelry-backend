@@ -1,5 +1,5 @@
 import express from "express";
-
+import NodeCache from "node-cache";
 
 // Importing Routes
 
@@ -13,6 +13,10 @@ import { errorMiddleware } from "./middlewares/error.js";
 
 
 connectDB()
+
+export const myCache = new NodeCache();
+
+
 const app = express();
 const port = 3000;
 // process.env.PORT
