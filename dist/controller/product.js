@@ -24,7 +24,7 @@ export const newProduct = asyncHandler(async (req, res, next) => {
         photo: photo?.path,
     });
     await invalidatesCache({ product: true });
-    return res.status(201).json({
+    return res.status(200).json({
         success: true,
         message: "Product created successfully",
     });

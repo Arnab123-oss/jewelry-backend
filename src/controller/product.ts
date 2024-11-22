@@ -39,7 +39,7 @@ export const newProduct = asyncHandler(async (
 
     await invalidatesCache({ product: true })
 
-    return res.status(201).json({
+    return res.status(200).json({
         success: true,
         message: "Product created successfully",
 

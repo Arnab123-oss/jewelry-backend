@@ -28,7 +28,7 @@ const OrderSchema = new mongoose.Schema({
         ref: "User",
         required: true,
     },
-    subTotal: {
+    subtotal: {
         type: Number,
         required: true,
     },
@@ -39,10 +39,12 @@ const OrderSchema = new mongoose.Schema({
     shippingCharges: {
         type: Number,
         required: true,
+        default: 0,
     },
     discount: {
         type: Number,
         required: true,
+        default: 0
     },
     total: {
         type: Number,

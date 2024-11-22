@@ -6,6 +6,6 @@ export var UserRole;
 export var OrderStatus;
 (function (OrderStatus) {
     OrderStatus["PROCESSING"] = "Processing";
-    OrderStatus["SHIPPED"] = "shipped";
+    OrderStatus["SHIPPED"] = "Shipped";
     OrderStatus["DELIVERED"] = "Delivered";
 })(OrderStatus || (OrderStatus = {}));

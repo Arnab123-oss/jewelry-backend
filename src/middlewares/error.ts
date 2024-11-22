@@ -9,7 +9,7 @@ export const errorMiddleware = (err: ErrorHandler, req: Request, res: Response, 
     err.message ||=""
     err.statusCode ||=500
 
-
+    if(err.name === "CastError") err.message = "Invalid Id"
     
     res.status(404).json({
         status: false,

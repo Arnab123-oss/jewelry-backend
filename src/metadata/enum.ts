@@ -5,6 +5,6 @@ export enum UserRole {
 
 export enum OrderStatus {
     PROCESSING = "Processing",
-    SHIPPED = "shipped",
+    SHIPPED = "Shipped",
     DELIVERED = "Delivered",
 }
