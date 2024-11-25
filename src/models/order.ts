@@ -59,7 +59,7 @@ const OrderSchema = new mongoose.Schema({
         enum: OrderStatus,
         default: OrderStatus.PROCESSING,
     },
-    oredrItems: [
+    orderItems: [
         {
             name: String,
             photo: String,

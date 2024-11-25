@@ -11,7 +11,7 @@ if(!id) return next(new ErrorHandler("LogIn Please",401));
 
 const user = await User.findById(id);
 if(!user) return next(new ErrorHandler("User not found",401));
-if(user.role!== "admin") return next(new ErrorHandler(user.name+"is not a Admin",401));
+if(user.role!== "admin") return next(new ErrorHandler(user.name+"is not a Admin",403));
 
 next();
 

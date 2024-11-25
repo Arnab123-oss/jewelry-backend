@@ -17,7 +17,7 @@ export const newOrder = asyncHandler(async (req: Request<NewOrderRequestBody>, r
         return next(new ErrorHandler("Please Enter All Fields", 400));
 
 
-    await Order.create({
+    const order = await Order.create({
         shippingInfo,
         user,
         subtotal,
@@ -30,7 +30,13 @@ export const newOrder = asyncHandler(async (req: Request<NewOrderRequestBody>, r
 
     await reduceStock(orderItems)
 
-    await invalidatesCache({ product: true, order: true, admin: true, userId: user })
+    await invalidatesCache({
+        product: true,
+        order: true,
+        admin: true,
+        userId: user,
+        productId: order.orderItems.map((i) => String(i.productId)),
+    })
 
     return res.status(201).json({
         success: true,

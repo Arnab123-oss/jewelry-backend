@@ -7,7 +7,7 @@ export const newOrder = asyncHandler(async (req, res, next) => {
     const { shippingInfo, user, subtotal, tax, shippingCharges, discount, total, orderItems, } = req.body;
     if (!shippingInfo || !orderItems || !user || !subtotal || !tax || !total)
         return next(new ErrorHandler("Please Enter All Fields", 400));
-    await Order.create({
+    const order = await Order.create({
         shippingInfo,
         user,
         subtotal,
@@ -18,7 +18,13 @@ export const newOrder = asyncHandler(async (req, res, next) => {
         orderItems,
     });
     await reduceStock(orderItems);
-    await invalidatesCache({ product: true, order: true, admin: true, userId: user });
+    await invalidatesCache({
+        product: true,
+        order: true,
+        admin: true,
+        userId: user,
+        productId: order.orderItems.map((i) => String(i.productId)),
+    });
     return res.status(201).json({
         success: true,
         message: "Order placed successfully"

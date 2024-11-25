@@ -10,6 +10,6 @@ export const adminOnly = asyncHandler(async (req, res, next) => {
     if (!user)
         return next(new ErrorHandler("User not found", 401));
     if (user.role !== "admin")
-        return next(new ErrorHandler(user.name + "is not a Admin", 401));
+        return next(new ErrorHandler(user.name + "is not a Admin", 403));
     next();
 });
