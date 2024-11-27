@@ -1,13 +1,14 @@
 import { Document, SchemaTimestampsConfig } from "mongoose";
 
-export interface IUser extends Document,SchemaTimestampsConfig {
+export interface IUser extends Document {
     _id: string;
     name: string;
     email: string;
     photo: string;
-    role: "admin"|"user";
-    gender: "male"|"female";
-    dob:Date;
+    role: "admin" | "user";
+    gender: "male" | "female";
+    dob: Date;
     // virtual properties
     age: number;
+ 
 }

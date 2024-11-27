@@ -1,9 +1,10 @@
 import { myCache } from "../app.js";
+import { IUser } from "../interface/IUser.js";
 import { asyncHandler } from "../middlewares/error.js";
 import { Order } from "../models/order.js";
 import { Product } from "../models/product.js";
 import { User } from "../models/user.js";
-import { calculatePrecentage } from "../utils/features.js";
+import { calculatePrecentage, getChartData, getInventories } from "../utils/features.js";
 
 
 
@@ -154,7 +155,7 @@ export const getDashboardStats = asyncHandler(async (req, res, next) => {
 
         lastSixMonthOrders.forEach((order) => {
             const creationDate = order.createdAt;
-            const monthDiff = today.getMonth() - creationDate.getMonth();
+            const monthDiff = (today.getMonth() - creationDate.getMonth() + 12) % 12;
 
             if (monthDiff < 6) {
                 orderMonthCounts[6 - monthDiff - 1] += 1;
@@ -166,18 +167,12 @@ export const getDashboardStats = asyncHandler(async (req, res, next) => {
         })
 
 
-        const categoriesCountPromise = categories.map((category) => Product.countDocuments({ category }))
 
-        const categoriesCount = await Promise.all(categoriesCountPromise);
-
-        const categoryCount: Record<string, number>[] = []
-
-        categories.forEach((category, i) => {
-            categoryCount.push({
-                [category]: Math.round((categoriesCount[i] / productsCount) * 100),
-            })
-        })
-
+        const categoryCount = await
+            getInventories({
+                categories,
+                productsCount
+            });
 
         const userRatio = {
             male: usersCount - femaleUsersCount,
@@ -204,7 +199,7 @@ export const getDashboardStats = asyncHandler(async (req, res, next) => {
             }
         }
 
-        myCache.set(key,JSON.stringify(stats))
+        myCache.set(key, JSON.stringify(stats))
     }
 
     return res.status(200).json({
@@ -219,8 +214,187 @@ export const getDashboardStats = asyncHandler(async (req, res, next) => {
 })
 
 
-export const getPieCharts = asyncHandler(async (req, res, next) => { })
+export const getPieCharts = asyncHandler(async (req, res, next) => {
 
-export const getBarCharts = asyncHandler(async (req, res, next) => { })
+    let charts;
+    const key = "admin-pie-charts"
+
+    if (myCache.has(key)) {
+        charts = JSON.parse(myCache.get(key) as string)
+    } else {
+
+        const [
+            processingOrder,
+            shippedOrder,
+            deliveredOrder,
+            categories,
+            productsCount,
+            productOutOfStock,
+            allOrders,
+            allUsers,
+            adminUserCount,
+            customerUserCount
+        ] = await Promise.all([
+            Order.countDocuments({ status: "Processing" }),
+            Order.countDocuments({ status: "Shipped" }),
+            Order.countDocuments({ status: "Delivered" }),
+            Product.distinct("category"),
+            Product.countDocuments(),
+            Product.countDocuments({ stock: 0 }),
+            Order.find({}).select(["total", "discount", "subtotsl", "tax", "shippingCharges"]),
+            User.find({}).select(["dob"]),
+            User.countDocuments({ role: "admin" }),
+            User.countDocuments({ role: "user" }),
+
+        ])
+
+
+        const orderFulfilment = {
+            processing: processingOrder,
+            shipped: shippedOrder,
+            delivered: deliveredOrder
+        }
+
+
+
+        const productCategories = await
+            getInventories({
+                categories,
+                productsCount
+            });
+
+        const stockAvailablity = {
+            inStock: productsCount - productOutOfStock,
+            outOfStock: productOutOfStock
+        }
+
+        const grossIncome = allOrders.reduce((prev, order) => prev + (order.total || 0), 0);
+
+        const discount = allOrders.reduce((prev, order) => prev + (order.discount || 0), 0);
+
+        const productionCost = allOrders.reduce((prev, order) => prev + (order.shippingCharges || 0), 0);
+
+        const burnt = allOrders.reduce((prev, order) => prev + (order.tax || 0), 0);
+
+        const marketingCost = Math.round(grossIncome * (30 / 100));
+
+        const netMargin = grossIncome - discount - productionCost - burnt - marketingCost;
+
+
+        const revenueDistribution = {
+            netMargin,
+            discount,
+            productionCost,
+            burnt,
+            marketingCost
+        }
+
+        const usersAgeGroup = {
+            ten: allUsers.filter((user) => user.age < 20).length,
+            adult: allUsers.filter((user) => user.age >= 20 && user.age < 40).length,
+            old: allUsers.filter((user) => user.age >= 40).length,
+        }
+
+        const adminCustomer = {
+            admin: adminUserCount,
+            customer: customerUserCount
+        }
+
+
+        charts = {
+            orderFulfilment,
+            productCategories,
+            stockAvailablity,
+            revenueDistribution,
+            adminCustomer,
+            usersAgeGroup
+
+        }
+
+
+
+
+        myCache.set(key, JSON.stringify(charts))
+    }
+
+    return res.status(200).json({
+        success: true,
+        charts,
+        message: "Stats fetched successfully"
+    })
+
+
+})
+
+export const getBarCharts = asyncHandler(async (req, res, next) => {
+
+
+    let charts;
+    const key = "admin-bar-charts"
+    if (myCache.has(key)) {
+        charts = JSON.parse(myCache.get(key) as string)
+    } else {
+        const today = new Date();
+
+        const sixMonthAgo = new Date();
+        sixMonthAgo.setMonth(sixMonthAgo.getMonth() - 6);
+
+        const twelveMonthAgo = new Date();
+        sixMonthAgo.setMonth(sixMonthAgo.getMonth() - 12);
+
+
+        const lastSixMonthProductsPromise = Product.find({
+            createdAt: {
+                $gte: sixMonthAgo,
+                $lte: today
+            }
+
+        })
+
+        const lastSixMonthUsersPromise = User.find({
+            createdAt: {
+                $gte: sixMonthAgo,
+                $lte: today
+            }
+
+        })
+
+        const lastTwelveMonthOrdersPromise = Order.find({
+            createdAt: {
+                $gte: twelveMonthAgo,
+                $lte: today
+            }
+
+        })
+
+
+        const [products, users, orders] = await Promise.all([
+
+            lastSixMonthProductsPromise,
+            lastSixMonthUsersPromise,
+            lastTwelveMonthOrdersPromise
+
+        ])
+
+        const productCount = getChartData({ length: 6, today, docArr: products});
+        const userCount = getChartData({ length: 6, today, docArr: users });
+        const orderCount = getChartData({ length: 12, today, docArr: orders });
+
+
+
+        charts = {}
+
+        myCache.set(key, JSON.stringify(charts))
+    }
+
+
+
+    return res.status(200).json({
+        success: true,
+        charts,
+        message: "Stats fetched successfully"
+    })
+
+})
 
 export const getLineCharts = asyncHandler(async (req, res, next) => { })
