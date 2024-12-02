@@ -245,10 +245,14 @@ export const getBarCharts = asyncHandler(async (req, res, next) => {
             lastSixMonthUsersPromise,
             lastTwelveMonthOrdersPromise
         ]);
-        const productCount = getChartData({ length: 6, today, docArr: products });
-        const userCount = getChartData({ length: 6, today, docArr: users });
-        const orderCount = getChartData({ length: 12, today, docArr: orders });
-        charts = {};
+        const productCounts = getChartData({ length: 6, today, docArr: products });
+        const usersCounts = getChartData({ length: 6, today, docArr: users });
+        const ordersCounts = getChartData({ length: 12, today, docArr: orders });
+        charts = {
+            products: productCounts,
+            users: usersCounts,
+            orders: ordersCounts
+        };
         myCache.set(key, JSON.stringify(charts));
     }
     return res.status(200).json({
