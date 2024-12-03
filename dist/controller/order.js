@@ -18,7 +18,7 @@ export const newOrder = asyncHandler(async (req, res, next) => {
         orderItems,
     });
     await reduceStock(orderItems);
-    await invalidatesCache({
+    invalidatesCache({
         product: true,
         order: true,
         admin: true,
@@ -91,7 +91,7 @@ export const processOrder = asyncHandler(async (req, res, next) => {
             break;
     }
     await order.save();
-    await invalidatesCache({
+    invalidatesCache({
         product: false,
         order: true,
         admin: true,
@@ -109,7 +109,7 @@ export const deleteOrder = asyncHandler(async (req, res, next) => {
     if (!order)
         return next(new ErrorHandler("Order Not Found", 404));
     await order.deleteOne();
-    await invalidatesCache({
+    invalidatesCache({
         product: false,
         order: true,
         admin: true,

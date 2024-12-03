@@ -37,7 +37,7 @@ export const newProduct = asyncHandler(async (
         photo: photo?.path,
     });
 
-    await invalidatesCache({ product: true })
+    invalidatesCache({ product: true,  admin: true, })
 
     return res.status(200).json({
         success: true,
@@ -171,8 +171,9 @@ export const updateProduct = asyncHandler(async (
 
     await product!.save()
 
-    await invalidatesCache({
+    invalidatesCache({
         product: true,
+        admin: true,
         productId: String(product?._id)
     })
 
@@ -196,8 +197,9 @@ export const deleteProdut = asyncHandler(async (req, res, next) => {
 
     await product?.deleteOne();
 
-    await invalidatesCache({
+    invalidatesCache({
         product: true,
+        admin: true,
         productId: String(product?._id)
     })
 

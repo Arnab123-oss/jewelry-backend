@@ -6,7 +6,7 @@ export const connectDB = (uri) => {
         .then(c => console.log(`DB Connected to ${c.connection.host}`))
         .catch(e => (console.log(e)));
 };
-export const invalidatesCache = async ({ product, order, admin, userId, orderId, productId }) => {
+export const invalidatesCache = ({ product, order, admin, userId, orderId, productId }) => {
     if (product) {
         const productKeys = [
             "latest_products",
@@ -26,6 +26,12 @@ export const invalidatesCache = async ({ product, order, admin, userId, orderId,
         myCache.del(orderKeys);
     }
     if (admin) {
+        myCache.del([
+            "admin-stats",
+            "admin-pie-charts",
+            "admin-bar-charts",
+            "admin-line-charts"
+        ]);
     }
 };
 export const reduceStock = async (orderItems) => {
@@ -56,13 +62,15 @@ export const getInventories = async ({ categories, productsCount }) => {
     });
     return categoryCount;
 };
-export const getChartData = ({ length, docArr, today }) => {
+export const getChartData = ({ length, docArr, today, property }) => {
     const data = new Array(length).fill(0);
+    // console.log(length, docArr, today);
     docArr.forEach((i) => {
         const creationDate = i.createdAt;
         const monthDiff = (today.getMonth() - creationDate.getMonth() + 12) % 12;
+        // console.log(monthDiff)
         if (monthDiff < length) {
-            data[length - monthDiff - 1] += 1;
+            data[length - monthDiff - 1] += property ? i[property] : 1;
         }
     });
     return data;

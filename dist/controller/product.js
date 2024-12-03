@@ -23,7 +23,7 @@ export const newProduct = asyncHandler(async (req, res, next) => {
         stock,
         photo: photo?.path,
     });
-    await invalidatesCache({ product: true });
+    invalidatesCache({ product: true, admin: true, });
     return res.status(200).json({
         success: true,
         message: "Product created successfully",
@@ -113,8 +113,9 @@ export const updateProduct = asyncHandler(async (req, res, next) => {
     if (category)
         product.category = category.toLowerCase();
     await product.save();
-    await invalidatesCache({
+    invalidatesCache({
         product: true,
+        admin: true,
         productId: String(product?._id)
     });
     return res.status(200).json({
@@ -130,8 +131,9 @@ export const deleteProdut = asyncHandler(async (req, res, next) => {
         console.log("Product Photo Deleted");
     });
     await product?.deleteOne();
-    await invalidatesCache({
+    invalidatesCache({
         product: true,
+        admin: true,
         productId: String(product?._id)
     });
     return res.status(201).json({

@@ -30,7 +30,7 @@ export const newOrder = asyncHandler(async (req: Request<NewOrderRequestBody>, r
 
     await reduceStock(orderItems)
 
-    await invalidatesCache({
+    invalidatesCache({
         product: true,
         order: true,
         admin: true,
@@ -134,7 +134,7 @@ export const processOrder = asyncHandler(async (req, res, next) => {
 
     await order.save()
 
-    await invalidatesCache({
+    invalidatesCache({
         product: false,
         order: true,
         admin: true,
@@ -159,7 +159,7 @@ export const deleteOrder = asyncHandler(async (req, res, next) => {
     await order.deleteOne()
 
 
-    await invalidatesCache({
+    invalidatesCache({
         product: false,
         order: true,
         admin: true,

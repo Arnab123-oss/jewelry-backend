@@ -3,8 +3,34 @@ import { asyncHandler } from "../middlewares/error.js";
 import { Coupon } from "../models/coupon.js"
 import { Coupontype } from "../types/types.js";
 import ErrorHandler from "../utils/utility-class.js";
+import { stripe } from "../app.js";
 
 
+
+
+
+export const createPaymentIntent = asyncHandler(async (req: Request<Coupontype>, res: Response, next: NextFunction) => {
+
+    const { amount } = req.body;
+
+
+    if (!amount) next(new ErrorHandler("Please enter Amount", 400))
+
+    const paymentIntent = await stripe.paymentIntents.create({
+        amount: Number(amount) * 100,
+        currency: "inr",
+        "payment_method_types": ["card"]
+    })
+
+
+
+    res.status(201).json({
+        success: true,
+        clientSecret:paymentIntent.client_secret,
+
+    })
+
+})
 
 export const newCoupon = asyncHandler(async (req: Request<Coupontype>, res: Response, next: NextFunction) => {
 
@@ -42,7 +68,7 @@ export const applyDiscount = asyncHandler(async (req, res, next) => {
 
     res.status(200).json({
         success: true,
-       discount: discount?.amount,
+        discount: discount?.amount,
 
     })
 
@@ -73,7 +99,7 @@ export const deleteCoupon = asyncHandler(async (req, res, next) => {
 
     res.status(200).json({
         success: true,
-        message: `Coupon ${coupon?.code} deleted successfully`, 
+        message: `Coupon ${coupon?.code} deleted successfully`,
 
     })
 
