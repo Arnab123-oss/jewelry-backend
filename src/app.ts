@@ -1,7 +1,8 @@
 import express from "express";
 import NodeCache from "node-cache";
-import {config} from "dotenv";
+import { config } from "dotenv";
 import morgan from "morgan";
+import cors from "cors";
 
 // Importing Routes
 
@@ -18,7 +19,7 @@ import { connectDB } from "./utils/features.js";
 import { errorMiddleware } from "./middlewares/error.js";
 
 config({
-    path:"./.env"
+    path: "./.env"
 })
 
 
@@ -39,10 +40,13 @@ const app = express();
 
 
 
-app.use(express.json())
-app.use(morgan("dev"))
+app.use(express.json());
+app.use(morgan("dev"));
+app.use(cors());
 
-
+// origin: "http://localhost:5173/",
+// credentials: true,
+// methods: ["GET", "POST", "PUT", "DELETE", "PATCH"]
 
 
 // Using Routes
