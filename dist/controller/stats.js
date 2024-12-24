@@ -186,7 +186,7 @@ export const getPieCharts = asyncHandler(async (req, res, next) => {
             marketingCost
         };
         const usersAgeGroup = {
-            ten: allUsers.filter((user) => user.age < 20).length,
+            teen: allUsers.filter((user) => user.age < 20).length,
             adult: allUsers.filter((user) => user.age >= 20 && user.age < 40).length,
             old: allUsers.filter((user) => user.age >= 40).length,
         };

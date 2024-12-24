@@ -37,7 +37,7 @@ export const newProduct = asyncHandler(async (
         photo: photo?.path,
     });
 
-    invalidatesCache({ product: true,  admin: true, })
+    invalidatesCache({ product: true, admin: true, })
 
     return res.status(200).json({
         success: true,
@@ -96,21 +96,21 @@ export const getAllcategories = asyncHandler(async (req, res, next) => {
 
 //Revalidate on New,Update,Delete product & on New Order
 export const getAdminProducts = asyncHandler(async (req, res, next) => {
-    let allProducts;
+    let products;
 
     if (myCache.has("All_Products")) {
-        allProducts = JSON.parse(myCache.get("All_Products") as string)
+        products = JSON.parse(myCache.get("All_Products") as string)
 
     }
     else {
-        allProducts = await Product.find({})
-        myCache.set("All_Products", JSON.stringify(allProducts))
+        products = await Product.find({})
+        myCache.set("All_Products", JSON.stringify(products))
     }
 
 
     return res.status(201).json({
         success: true,
-        allProducts,
+        products,
 
     });
 })
@@ -215,6 +215,8 @@ export const getAllProducts = asyncHandler(async (req: Request<SearchRequestQuer
 
     const { search, sort, category, price } = req.query
 
+
+
     const page = Number(req.query.page) || 1;
 
     const limit = Number(process.env.PRODUCT_PER_PAGE) || 8;
@@ -239,6 +241,8 @@ export const getAllProducts = asyncHandler(async (req: Request<SearchRequestQuer
         }
     }
     if (category && typeof category === "string") baseQuery.category = category
+
+
 
     const [products, filteredOnlyProduct] = await Promise.all([
         Product.find(baseQuery)

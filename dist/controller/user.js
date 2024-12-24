@@ -6,7 +6,8 @@ export const createUser = asyncHandler(async (req, res, next) => {
     let userdata = await User.findById(userReq._id);
     if (userdata) {
         res.status(200).json({
-            success: `Welcome , ${userdata.name}`
+            success: true,
+            message: `Welcome , ${userdata.name}`
         });
     }
     if (!userReq._id || !userReq.name || !userReq.email || !userReq.photo || !userReq.gender || !userReq.dob) {

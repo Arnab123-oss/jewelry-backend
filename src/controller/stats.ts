@@ -161,7 +161,6 @@ export const getDashboardStats = asyncHandler(async (req, res, next) => {
                 orderMonthCounts[6 - monthDiff - 1] += 1;
                 orderMonthRevenue[6 - monthDiff - 1] += order.total;
 
-
             }
 
         })
@@ -290,7 +289,7 @@ export const getPieCharts = asyncHandler(async (req, res, next) => {
         }
 
         const usersAgeGroup = {
-            ten: allUsers.filter((user) => user.age < 20).length,
+            teen: allUsers.filter((user) => user.age < 20).length,
             adult: allUsers.filter((user) => user.age >= 20 && user.age < 40).length,
             old: allUsers.filter((user) => user.age >= 40).length,
         }

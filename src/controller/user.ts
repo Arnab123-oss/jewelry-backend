@@ -20,7 +20,8 @@ export const createUser = asyncHandler(
 
         if (userdata) {
             res.status(200).json({
-                success: `Welcome , ${userdata.name}`
+                success: true,
+                message: `Welcome , ${userdata.name}`
 
             })
         }

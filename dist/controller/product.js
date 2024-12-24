@@ -61,17 +61,17 @@ export const getAllcategories = asyncHandler(async (req, res, next) => {
 });
 //Revalidate on New,Update,Delete product & on New Order
 export const getAdminProducts = asyncHandler(async (req, res, next) => {
-    let allProducts;
+    let products;
     if (myCache.has("All_Products")) {
-        allProducts = JSON.parse(myCache.get("All_Products"));
+        products = JSON.parse(myCache.get("All_Products"));
     }
     else {
-        allProducts = await Product.find({});
-        myCache.set("All_Products", JSON.stringify(allProducts));
+        products = await Product.find({});
+        myCache.set("All_Products", JSON.stringify(products));
     }
     return res.status(201).json({
         success: true,
-        allProducts,
+        products,
     });
 });
 export const getProdutsDetails = asyncHandler(async (req, res, next) => {
