@@ -1,27 +1,28 @@
 import { asyncHandler } from "../middlewares/error.js";
 import { Product } from "../models/product.js";
 import ErrorHandler from "../utils/utility-class.js";
-import { rm } from "fs";
 import { myCache } from "../app.js";
 import { invalidatesCache } from "../utils/features.js";
+import { deleteImageFromCloudinary, uploadToCloudinary } from "../utils/Cloudinary.js";
 export const newProduct = asyncHandler(async (req, res, next) => {
     const { name, category, price, stock } = req.body;
-    const photo = req.file;
-    // as Express.Multer.File;
-    if (!photo)
-        next(new ErrorHandler("please provide a photo", 400));
-    if (!name || !price || !category || !stock) {
-        photo?.path && rm(photo.path, () => {
-            console.log("Deleted");
-        });
-        return next(new ErrorHandler("please enter all fields", 400));
+    const photos = req.files;
+    if (!photos || photos.length === 0) {
+        return next(new ErrorHandler("Please provide at least one photo", 400));
     }
+    const filePaths = photos.map((file) => file.path);
+    const photoPaths = await uploadToCloudinary(filePaths);
+    if (!photoPaths || photoPaths.length === 0) {
+        return next(new ErrorHandler("Failed to upload photos to Cloudinary", 500));
+    }
+    // Extract the URLs of uploaded images
+    const photoUrls = photoPaths.map((photo) => photo.secure_url);
     await Product.create({
         name,
         category: category.toLowerCase(),
         price,
         stock,
-        photo: photo?.path,
+        photos: photoUrls,
     });
     invalidatesCache({ product: true, admin: true, });
     return res.status(200).json({
@@ -94,15 +95,30 @@ export const getProdutsDetails = asyncHandler(async (req, res, next) => {
 export const updateProduct = asyncHandler(async (req, res, next) => {
     const id = req.params.id;
     const { name, category, price, stock } = req.body;
-    const photo = req.file;
+    const photos = req.files;
     const product = await Product.findById(id);
     if (!product)
         next(new ErrorHandler("Invalid Product Id ", 404));
-    if (photo) {
-        rm(product.photo, () => {
-            console.log("Old photo Deleted");
-        });
-        product.photo = photo.path;
+    // If there are new photos uploaded, delete old photos from Cloudinary
+    if (photos) {
+        // Delete old photos from Cloudinary
+        if (product?.photos && product.photos.length > 0) {
+            for (const oldPhoto of product.photos) {
+                const deletionResult = await deleteImageFromCloudinary(oldPhoto);
+                if (!deletionResult) {
+                    console.log('Failed to delete old photo from Cloudinary');
+                    return next(new ErrorHandler('Error deleting product photo from Cloudinary', 500));
+                }
+                console.log('Old product photo deleted from Cloudinary');
+            }
+        }
+        const photoPaths = await uploadToCloudinary(photos.map((file) => file.path));
+        if (!photoPaths) {
+            return next(new ErrorHandler("Failed to upload photos to Cloudinary", 500));
+        }
+        // Extract the URLs of uploaded images
+        const photoUrls = photoPaths.map((photo) => photo.secure_url);
+        product.photos = photoUrls;
     }
     if (name)
         product.name = name;
@@ -127,9 +143,17 @@ export const deleteProdut = asyncHandler(async (req, res, next) => {
     const product = await Product.findById(req.params.id);
     if (!product)
         next(new ErrorHandler("Product not found", 404));
-    rm(product.photo, () => {
-        console.log("Product Photo Deleted");
-    });
+    if (product?.photos && product.photos.length > 0) {
+        // Loop through each photo in the array and delete it
+        for (const photo of product.photos) {
+            const deletionResult = await deleteImageFromCloudinary(photo);
+            if (!deletionResult) {
+                console.log('Failed to delete photo from Cloudinary');
+                return next(new ErrorHandler('Error deleting product photo from Cloudinary', 500));
+            }
+            console.log('Product Photo Deleted from Cloudinary');
+        }
+    }
     await product?.deleteOne();
     invalidatesCache({
         product: true,

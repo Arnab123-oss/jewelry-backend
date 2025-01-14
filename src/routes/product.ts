@@ -2,13 +2,13 @@ import express from "express";
 
 import { adminOnly } from "../middlewares/Auth.js";
 import { deleteProdut, getAdminProducts, getAllcategories, getAllProducts, getlatestProducts, getProdutsDetails, newProduct, updateProduct } from "../controller/product.js";
-import { singleUpload } from "../middlewares/multer.js";
+import { singleUpload,multipleUpload } from "../middlewares/multer.js";
 
 
 
 const app = express.Router();
 
-app.post("/new",adminOnly,singleUpload,newProduct)
+app.post("/new",adminOnly,multipleUpload,newProduct)
 
 app.get("/latest",getlatestProducts)
 
