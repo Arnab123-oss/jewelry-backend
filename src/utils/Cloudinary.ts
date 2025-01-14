@@ -2,25 +2,25 @@ import { v2 as cloudinary } from "cloudinary";
 import fs from "fs";
 
 
-// cloudinary.config({
-//   cloud_name: 'moemorable',
-//   api_key: '361131984758527',
-//   api_secret: 'JNncguTobV5hD7J7fKlyoeAecXQ',
-// });
-
-
-  const fuck =cloudinary.config({ 
-    cloud_name: process.env.CLOUDINARY_CLIENT_NAME,
-    api_key: process.env.CLOUDINARY_CLIENT_API,
-    api_secret: process.env.CLOUDINARY_CLIENT_SECRRET,
+cloudinary.config({
+  cloud_name: 'moemorable',
+  api_key: '361131984758527',
+  api_secret: 'JNncguTobV5hD7J7fKlyoeAecXQ',
 });
+
+
+//   const fuck =cloudinary.config({ 
+//     cloud_name: process.env.CLOUDINARY_CLIENT_NAME,
+//     api_key: process.env.CLOUDINARY_CLIENT_API,
+//     api_secret: process.env.CLOUDINARY_CLIENT_SECRRET,
+// });
 
 
 const uploadToCloudinary = async (
   localFilePaths: string[]
 ) => {
   try {
-  console.log("config",fuck,process.env.PORT);
+  // console.log("config",fuck,process.env.PORT);
   
     const uploadPromises = localFilePaths.map(async (filePath) => {
       try {
